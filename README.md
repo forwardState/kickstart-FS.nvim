@@ -1,5 +1,205 @@
 # kickstart.nvim
 
+## Michael's Neovim Config
+
+This repo is a Kickstart-based Neovim config with custom plugins for LSP,
+completion, AI helpers, database work, Compiler Explorer, file navigation, and
+debugging.
+
+The repo is intended to be portable across machines, but each machine still
+needs local developer tools installed. Plugin source is managed by `lazy.nvim`;
+language servers, formatters, and debug adapters are mostly managed by Mason.
+
+### macOS Setup
+
+Install the baseline tools with Homebrew:
+
+```sh
+brew install neovim git make ripgrep fd unzip node go elixir erlang llvm zig
+```
+
+Install Apple's command line tools if they are not already present:
+
+```sh
+xcode-select --install
+```
+
+Optional but useful:
+
+```sh
+brew install postgresql@16 mysql-client sqlite
+brew install --cask font-jetbrains-mono-nerd-font google-chrome
+```
+
+Notes:
+
+- `node` is needed for TypeScript/JavaScript tooling, Copilot, and JS debugging.
+- `go` is needed if Mason needs to build/install Delve for Go debugging.
+- `elixir` and `erlang` are needed for Elixir LSP/debugging.
+- `llvm` provides modern Clang/LLDB tooling. Mason installs `codelldb`
+  separately for Neovim DAP.
+- `zig` is needed for Zig projects; debug builds use `codelldb`.
+- database CLIs are useful for `vim-dadbod`, depending on which databases you use.
+- Chrome is only needed for browser debugging.
+
+### Install This Config On Another Machine
+
+Back up any existing config first:
+
+```sh
+mv ~/.config/nvim ~/.config/nvim.backup
+```
+
+Clone this repo:
+
+```sh
+git clone <your-repo-url> ~/.config/nvim
+```
+
+Start Neovim:
+
+```sh
+nvim
+```
+
+On first startup:
+
+- `lazy.nvim` will install plugins.
+- Mason will install configured language servers and debug adapters.
+- If anything is missing, run `:checkhealth`, `:Lazy`, and `:Mason`.
+
+Useful manual commands:
+
+```vim
+:Lazy sync
+:Mason
+:MasonToolsInstall
+```
+
+### CodeCompanion / Codex ACP
+
+CodeCompanion is configured to use the Codex ACP adapter. Each machine must make
+the `codex-acp` executable available in one of two ways.
+
+Option 1: put `codex-acp` on `PATH`:
+
+```sh
+mkdir -p ~/.local/bin
+cp /path/to/codex-acp ~/.local/bin/codex-acp
+chmod +x ~/.local/bin/codex-acp
+```
+
+Make sure your shell exports `~/.local/bin`:
+
+```sh
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+Option 2: set `CODEX_ACP` to the absolute path:
+
+```sh
+export CODEX_ACP="$HOME/Dev/codex-acp"
+```
+
+Put the export in `~/.zshrc` or the machine's preferred shell/env setup.
+
+Verify:
+
+```sh
+codex-acp --help
+```
+
+or:
+
+```sh
+"$CODEX_ACP" --help
+```
+
+Claude Code is a separate tool and is not used by this CodeCompanion config
+unless a separate adapter/config is added later.
+
+### Auth And Machine-Local Files
+
+Do not commit machine-local secrets/logs:
+
+- `.env`
+- `.nvimlog`
+
+Copilot requires auth on each machine:
+
+```vim
+:Copilot auth
+```
+
+CodeCompanion with Codex ACP currently uses `auth_method = 'chatgpt'`, so the
+underlying Codex ACP setup must be authenticated on that machine.
+
+### Plugin Commands
+
+See `plugin-commands.md` for the command/keymap index across the configured
+plugins, including:
+
+- Telescope
+- LSP
+- GitSigns
+- Neo-tree
+- Barbar
+- Compiler Explorer
+- Copilot / Copilot Chat
+- CodeCompanion
+- Dadbod
+- DAP
+- completion/snippets
+- Treesitter
+- Mini.nvim
+- Comment.nvim
+
+### Debugging Support
+
+DAP is configured for:
+
+- Go through Delve
+- JavaScript/TypeScript/Svelte through `js-debug-adapter`
+- C/C++/Zig through `codelldb`
+- Elixir through `elixir-ls-debugger`
+
+Mason should install the debug adapters automatically. If needed:
+
+```vim
+:MasonInstall delve js-debug-adapter codelldb elixir-ls
+```
+
+For Node/TypeScript services:
+
+- local launch: use `Node: Launch package script`
+- local attach: start Node with `--inspect=127.0.0.1:9229`
+- Docker attach: start Node with `--inspect=0.0.0.0:9229` and expose `9229:9229`
+
+For browser/SvelteKit debugging:
+
+- start the dev server
+- use `Browser: Launch Chrome/SvelteKit`, or launch Chrome with:
+
+```sh
+/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
+  --remote-debugging-port=9222 \
+  --user-data-dir=/tmp/chrome-nvim-dap
+```
+
+For C/C++/Zig:
+
+- build with debug symbols, for example `clang -g -O0`, `clang++ -g -O0`, or
+  `zig build -Doptimize=Debug`
+- use `LLDB: Launch executable` or `LLDB: Attach process`
+
+For detailed debugger scenario runbooks, see the DAP section in
+`plugin-commands.md`.
+
+### Lockfile
+
+`lazy-lock.json` should be committed for reproducible plugin versions across
+machines. Run `:Lazy sync` after pulling changes.
+
 ## Introduction
 
 A starting point for Neovim that is:
@@ -236,4 +436,3 @@ sudo dnf install -y gcc make git ripgrep fd-find unzip neovim
 sudo pacman -S --noconfirm --needed gcc make git ripgrep fd unzip neovim
 ```
 </details>
-

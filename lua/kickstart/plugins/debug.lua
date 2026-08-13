@@ -14,6 +14,9 @@ return {
     -- Creates a beautiful debugger UI
     'rcarriga/nvim-dap-ui',
 
+    -- Shows variable values inline while debugging
+    'theHamsta/nvim-dap-virtual-text',
+
     -- Required dependency for nvim-dap-ui
     'nvim-neotest/nvim-nio',
 
@@ -27,28 +30,28 @@ return {
   keys = {
     -- Basic debugging keymaps, feel free to change to your liking!
     {
-      '<F5>',
+      '<leader>dc',
       function()
         require('dap').continue()
       end,
       desc = 'Debug: Start/Continue',
     },
     {
-      '<F1>',
+      '<leader>di',
       function()
         require('dap').step_into()
       end,
       desc = 'Debug: Step Into',
     },
     {
-      '<F2>',
+      '<leader>do',
       function()
         require('dap').step_over()
       end,
       desc = 'Debug: Step Over',
     },
     {
-      '<F3>',
+      '<leader>dO',
       function()
         require('dap').step_out()
       end,
@@ -70,7 +73,7 @@ return {
     },
     -- Toggle to see last session result. Without this, you can't see session output in case of unhandled exception.
     {
-      '<F7>',
+      '<leader>du',
       function()
         require('dapui').toggle()
       end,
@@ -95,6 +98,9 @@ return {
       ensure_installed = {
         -- Update this to ensure that you have the debuggers for the langs you want
         'delve',
+        'js',
+        'codelldb',
+        'elixir',
       },
     }
 
@@ -120,6 +126,22 @@ return {
       },
     }
 
+    require('nvim-dap-virtual-text').setup {
+      display_callback = function(variable)
+        local name = string.lower(variable.name)
+        local value = string.lower(variable.value)
+        if name:match 'secret' or name:match 'api' or value:match 'secret' or value:match 'api' then
+          return '*****'
+        end
+
+        if #variable.value > 15 then
+          return ' ' .. string.sub(variable.value, 1, 15) .. '... '
+        end
+
+        return ' ' .. variable.value
+      end,
+    }
+
     -- Change breakpoint icons
     -- vim.api.nvim_set_hl(0, 'DapBreak', { fg = '#e51400' })
     -- vim.api.nvim_set_hl(0, 'DapStop', { fg = '#ffcc00' })
@@ -135,6 +157,208 @@ return {
     dap.listeners.after.event_initialized['dapui_config'] = dapui.open
     dap.listeners.before.event_terminated['dapui_config'] = dapui.close
     dap.listeners.before.event_exited['dapui_config'] = dapui.close
+
+    local function input(default, prompt)
+      local value = vim.fn.input(prompt, default)
+      if value == '' then
+        return default
+      end
+      return value
+    end
+
+    local function split_args(value)
+      return vim.split(value or '', ' +', { trimempty = true })
+    end
+
+    local js_debug_adapter = vim.fn.exepath 'js-debug-adapter'
+    if js_debug_adapter ~= '' then
+      dap.adapters['pwa-node'] = {
+        type = 'server',
+        host = '127.0.0.1',
+        port = '${port}',
+        executable = {
+          command = js_debug_adapter,
+          args = { '${port}' },
+        },
+      }
+      dap.adapters['pwa-chrome'] = dap.adapters['pwa-node']
+
+      local js_configurations = {
+        {
+          name = 'Node: Launch current file',
+          type = 'pwa-node',
+          request = 'launch',
+          program = '${file}',
+          cwd = '${workspaceFolder}',
+          sourceMaps = true,
+          console = 'integratedTerminal',
+          skipFiles = { '<node_internals>/**' },
+        },
+        {
+          name = 'Node: Launch package script',
+          type = 'pwa-node',
+          request = 'launch',
+          cwd = '${workspaceFolder}',
+          runtimeExecutable = function()
+            return input('npm', 'Package manager: ')
+          end,
+          runtimeArgs = function()
+            return split_args(input('run dev', 'Package manager args: '))
+          end,
+          sourceMaps = true,
+          autoAttachChildProcesses = true,
+          console = 'integratedTerminal',
+          skipFiles = { '<node_internals>/**' },
+        },
+        {
+          name = 'Node: Attach process',
+          type = 'pwa-node',
+          request = 'attach',
+          processId = require('dap.utils').pick_process,
+          cwd = '${workspaceFolder}',
+          sourceMaps = true,
+          skipFiles = { '<node_internals>/**' },
+        },
+        {
+          name = 'Node: Attach inspect port 9229',
+          type = 'pwa-node',
+          request = 'attach',
+          address = function()
+            return input('127.0.0.1', 'Debug host: ')
+          end,
+          port = function()
+            return tonumber(input('9229', 'Debug port: '))
+          end,
+          localRoot = '${workspaceFolder}',
+          remoteRoot = function()
+            return input('/app', 'Remote root: ')
+          end,
+          sourceMaps = true,
+          skipFiles = { '<node_internals>/**' },
+        },
+        {
+          name = 'Browser: Launch Chrome/SvelteKit',
+          type = 'pwa-chrome',
+          request = 'launch',
+          url = function()
+            return input('http://localhost:5173', 'URL: ')
+          end,
+          webRoot = '${workspaceFolder}',
+          sourceMaps = true,
+        },
+        {
+          name = 'Browser: Attach Chrome port 9222',
+          type = 'pwa-chrome',
+          request = 'attach',
+          address = function()
+            return input('127.0.0.1', 'Browser debug host: ')
+          end,
+          port = function()
+            return tonumber(input('9222', 'Browser debug port: '))
+          end,
+          webRoot = '${workspaceFolder}',
+          sourceMaps = true,
+        },
+      }
+
+      for _, language in ipairs { 'javascript', 'typescript', 'javascriptreact', 'typescriptreact', 'svelte' } do
+        dap.configurations[language] = js_configurations
+      end
+    end
+
+    local native_configurations = {
+      {
+        name = 'LLDB: Launch executable',
+        type = 'codelldb',
+        request = 'launch',
+        program = function()
+          return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+        end,
+        cwd = '${workspaceFolder}',
+        stopOnEntry = false,
+        args = function()
+          return split_args(vim.fn.input 'Args: ')
+        end,
+        runInTerminal = true,
+      },
+      {
+        name = 'LLDB: Attach process',
+        type = 'codelldb',
+        request = 'attach',
+        pid = require('dap.utils').pick_process,
+        cwd = '${workspaceFolder}',
+      },
+    }
+
+    for _, language in ipairs { 'c', 'cpp', 'zig' } do
+      dap.configurations[language] = native_configurations
+    end
+
+    local elixir_ls_debugger = vim.fn.exepath 'elixir-ls-debugger'
+    if elixir_ls_debugger ~= '' then
+      dap.adapters.mix_task = {
+        type = 'executable',
+        command = elixir_ls_debugger,
+      }
+
+      dap.configurations.elixir = {
+        {
+          name = 'Elixir: Mix task prompt',
+          type = 'mix_task',
+          request = 'launch',
+          task = function()
+            return input('test', 'Mix task: ')
+          end,
+          taskArgs = function()
+            return split_args(vim.fn.input 'Mix task args: ')
+          end,
+          projectDir = '${workspaceFolder}',
+          startApps = true,
+          exitAfterTaskReturns = false,
+          debugAutoInterpretAllModules = false,
+        },
+        {
+          name = 'Elixir: Mix test',
+          type = 'mix_task',
+          request = 'launch',
+          task = 'test',
+          taskArgs = { '--trace' },
+          projectDir = '${workspaceFolder}',
+          startApps = true,
+          requireFiles = {
+            'test/**/test_helper.exs',
+            'test/**/*_test.exs',
+          },
+          debugAutoInterpretAllModules = false,
+        },
+        {
+          name = 'Elixir: Mix test current file',
+          type = 'mix_task',
+          request = 'launch',
+          task = 'test',
+          taskArgs = function()
+            return { vim.fn.expand '%:p' }
+          end,
+          projectDir = '${workspaceFolder}',
+          startApps = true,
+          requireFiles = {
+            'test/**/test_helper.exs',
+            vim.fn.expand '%:p',
+          },
+          debugAutoInterpretAllModules = false,
+        },
+        {
+          name = 'Elixir: Phoenix server',
+          type = 'mix_task',
+          request = 'launch',
+          task = 'phx.server',
+          projectDir = '${workspaceFolder}',
+          startApps = true,
+          exitAfterTaskReturns = false,
+          debugAutoInterpretAllModules = false,
+        },
+      }
+    end
 
     -- Install golang specific config
     require('dap-go').setup {

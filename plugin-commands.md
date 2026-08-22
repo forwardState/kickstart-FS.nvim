@@ -616,6 +616,97 @@ Project requirements:
 - Terminal `<Esc><Esc>` - exit terminal mode
 - `<C-h/j/k/l>` - move between windows
 
+## Ghostty Terminal
+
+These are active Ghostty 1.3.1 bindings from `ghostty +show-config`.
+`super` is the macOS Command key.
+
+### Config
+
+- `super+,` - open Ghostty config
+- `super+shift+,` - reload Ghostty config
+
+### Clipboard / Selection
+
+- `copy` - copy to clipboard
+- `paste` - paste from clipboard
+- `super+c` - copy to clipboard
+- `super+v` - paste from clipboard
+- `super+shift+v` - paste from selection
+- `super+a` - select all
+- `shift+arrow_left/right/up/down` - adjust selection
+- `shift+page_up/page_down` - adjust selection by page
+- `shift+home/end` - adjust selection to start/end
+
+### Font / Screen
+
+- `super+=` or `super++` - increase font size
+- `super+-` - decrease font size
+- `super+0` - reset font size
+- `super+k` - clear screen
+- `super+ctrl+shift+j` - copy screen contents to file
+- `super+shift+j` - paste screen contents to file
+- `super+alt+shift+j` - open screen contents as file
+
+### Windows / Tabs
+
+- `super+n` - new window
+- `super+w` - close current surface
+- `super+shift+w` - close window
+- `super+alt+w` - close current tab
+- `super+alt+shift+w` - close all windows
+- `super+t` - new tab
+- `ctrl+tab` - next tab
+- `ctrl+shift+tab` - previous tab
+- `super+shift+]` - next tab
+- `super+shift+[` - previous tab
+- `super+1` through `super+8` - go to tab 1-8
+- `super+9` - go to last tab
+- `super+enter` or `super+ctrl+f` - toggle fullscreen
+- `super+q` - quit Ghostty
+
+### Splits
+
+- `super+d` - new split to the right
+- `super+shift+d` - new split down
+- `super+shift+enter` - toggle split zoom
+- `super+[` - focus previous split by creation order
+- `super+]` - focus next split by creation order
+- `super+arrow_left` - focus previous split by creation order
+- `super+arrow_right` - focus next split by creation order
+- `super+alt+arrow_left/right/up/down` - focus split in that direction
+- `super+ctrl+arrow_left/right/up/down` - resize split in that direction
+- `super+ctrl+=` - equalize splits
+
+Ghostty does not currently expose a "toggle last focused split" action in this
+config. `goto_split:previous` and `goto_split:next` cycle through splits by
+creation order, so they feel like toggling only when there are two splits.
+
+### Scroll / Prompts / Search
+
+- `super+home` - scroll to top
+- `super+end` - scroll to bottom
+- `super+page_up` - scroll page up
+- `super+page_down` - scroll page down
+- `super+j` - scroll to selection
+- `super+arrow_up` or `super+shift+arrow_up` - jump to previous prompt
+- `super+arrow_down` or `super+shift+arrow_down` - jump to next prompt
+- `super+f` - start search
+- `super+e` - search selected text
+- `super+shift+f` or `escape` - end search
+- `super+g` - next search result
+- `super+shift+g` - previous search result
+
+### Editing / Misc
+
+- `super+shift+p` - toggle command palette
+- `super+shift+t` or `super+z` - undo
+- `super+shift+z` - redo
+- `super+alt+i` - toggle inspector
+- `super+backspace` - send `Ctrl-U`
+- `alt+arrow_left` - send `Esc-b`
+- `alt+arrow_right` - send `Esc-f`
+
 ## Disabled Modules
 
 `lua/kickstart/plugins/lint.lua` exists, but it is commented out in `init.lua`, so its mappings/autocommands are not active right now.

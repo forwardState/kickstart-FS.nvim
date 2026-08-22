@@ -155,6 +155,7 @@ plugins, including:
 - Treesitter
 - Mini.nvim
 - Comment.nvim
+- Ghostty terminal bindings
 
 Markdown files open as editable Markdown by default. Use `<leader>mr` in a
 Markdown buffer to toggle an in-terminal rendered view for reading.

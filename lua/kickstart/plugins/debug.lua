@@ -360,6 +360,44 @@ return {
       }
     end
 
+    local ocamlearlybird = vim.fn.exepath 'ocamlearlybird'
+    if ocamlearlybird ~= '' then
+      dap.adapters.ocamlearlybird = {
+        type = 'executable',
+        command = ocamlearlybird,
+        args = { 'debug' },
+      }
+
+      dap.configurations.ocaml = {
+        {
+          name = 'OCaml: Launch bytecode prompt',
+          type = 'ocamlearlybird',
+          request = 'launch',
+          program = function()
+            return vim.fn.input('Path to .bc file: ', vim.fn.getcwd() .. '/_build/default/', 'file')
+          end,
+          cwd = '${workspaceFolder}',
+          stopOnEntry = false,
+          yieldSteps = 4096,
+          onlyDebugGlob = '<${workspaceFolder}/**/*>',
+        },
+        {
+          name = 'OCaml: Launch current module bytecode',
+          type = 'ocamlearlybird',
+          request = 'launch',
+          program = function()
+            local relative_dir = vim.fn.expand '%:.:h'
+            local module_name = vim.fn.expand '%:t:r'
+            return vim.fn.getcwd() .. '/_build/default/' .. relative_dir .. '/' .. module_name .. '.bc'
+          end,
+          cwd = '${workspaceFolder}',
+          stopOnEntry = false,
+          yieldSteps = 4096,
+          onlyDebugGlob = '<${workspaceFolder}/**/*>',
+        },
+      }
+    end
+
     -- Install golang specific config
     require('dap-go').setup {
       delve = {

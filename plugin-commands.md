@@ -129,6 +129,14 @@
 - `:CodeCompanionActions`
 - `:CodeCompanionCmd`
 
+## Markdown Rendering
+
+- `<leader>mr` - toggle rendered Markdown view for the current buffer
+- `<leader>mp` - toggle pretty/rendered Markdown view for the current buffer
+- `:RenderMarkdown buf_toggle` - toggle rendered Markdown for the current buffer
+- `:RenderMarkdown toggle` - toggle rendered Markdown globally
+- `:RenderMarkdown preview` - plugin side-preview command; not mapped because it is less useful in this setup
+
 ## Dadbod
 
 - `:DB` - run a database query or open a database URL
@@ -160,6 +168,9 @@
 - C/C++/Zig:
   - `LLDB: Launch executable`
   - `LLDB: Attach process`
+- OCaml:
+  - `OCaml: Launch bytecode prompt`
+  - `OCaml: Launch current module bytecode`
 - Elixir:
   - `Elixir: Mix task prompt`
   - `Elixir: Mix test`
@@ -396,6 +407,75 @@ Attach steps:
 7. Pick the running process.
 
 Use launch when you want the debugger to start the program. Use attach when the program is already running or must be started by another tool.
+
+#### OCaml
+
+OCaml editor support:
+
+- syntax highlighting: Treesitter `ocaml`
+- completion/go-to-definition/etc: `ocamllsp`
+- formatting: `ocamlformat`
+- debugging: `ocamlearlybird` when installed separately
+
+Use `OCaml: Launch bytecode prompt` when:
+
+- you have built a `.bc` bytecode executable
+- you know where the `.bc` file is under `_build/default`
+- you want the most reliable OCaml debug path
+
+Steps:
+
+1. Build bytecode with debug symbols.
+2. Open a relevant `.ml` or `.mli` file.
+3. Set a breakpoint with `<leader>b`.
+4. Press `<leader>dc`.
+5. Choose `OCaml: Launch bytecode prompt`.
+6. Select the built `.bc` file.
+
+Use `OCaml: Launch current module bytecode` when:
+
+- the current file maps directly to a built `.bc` file at the same relative path
+- you want a faster shortcut than selecting the bytecode file manually
+
+Steps:
+
+1. Build bytecode with debug symbols.
+2. Open the relevant `.ml` file.
+3. Set a breakpoint with `<leader>b`.
+4. Press `<leader>dc`.
+5. Choose `OCaml: Launch current module bytecode`.
+
+OCaml DAP requirements:
+
+- install/init an opam switch on the machine
+- install project dependencies
+- Dune should use `(lang dune 3.7)` or newer for earlybird workflows
+- add `(map_workspace_root false)` to `dune-project` when using Dune 3.7+
+- build a bytecode executable, not only a native executable
+- bytecode stanzas generally need `(modes byte exe)`
+
+Example Dune executable stanza:
+
+```scheme
+(executable
+ (name main)
+ (modes byte exe)
+ (libraries your_libraries))
+```
+
+Build:
+
+```sh
+dune build
+```
+
+Then debug the resulting `.bc` file, commonly somewhere under:
+
+```text
+_build/default/
+```
+
+OCaml debugging is less universal than the JS/C/Zig setup. `ocamlearlybird` works with bytecode/debug-info workflows; native-code debugging is not covered by this DAP config.
 
 #### Elixir
 

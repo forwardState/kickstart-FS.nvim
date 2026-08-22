@@ -15,7 +15,7 @@ language servers, formatters, and debug adapters are mostly managed by Mason.
 Install the baseline tools with Homebrew:
 
 ```sh
-brew install neovim git make ripgrep fd unzip node go elixir erlang llvm zig
+brew install neovim git make ripgrep fd unzip node go elixir erlang llvm zig opam
 ```
 
 Install Apple's command line tools if they are not already present:
@@ -39,6 +39,7 @@ Notes:
 - `llvm` provides modern Clang/LLDB tooling. Mason installs `codelldb`
   separately for Neovim DAP.
 - `zig` is needed for Zig projects; debug builds use `codelldb`.
+- `opam` is needed for OCaml tools installed through Mason/opam.
 - database CLIs are useful for `vim-dadbod`, depending on which databases you use.
 - Chrome is only needed for browser debugging.
 
@@ -149,10 +150,14 @@ plugins, including:
 - CodeCompanion
 - Dadbod
 - DAP
+- Markdown rendering
 - completion/snippets
 - Treesitter
 - Mini.nvim
 - Comment.nvim
+
+Markdown files open as editable Markdown by default. Use `<leader>mr` in a
+Markdown buffer to toggle an in-terminal rendered view for reading.
 
 ### Debugging Support
 
@@ -161,12 +166,13 @@ DAP is configured for:
 - Go through Delve
 - JavaScript/TypeScript/Svelte through `js-debug-adapter`
 - C/C++/Zig through `codelldb`
+- OCaml through `ocamlearlybird` when installed separately
 - Elixir through `elixir-ls-debugger`
 
 Mason should install the debug adapters automatically. If needed:
 
 ```vim
-:MasonInstall delve js-debug-adapter codelldb elixir-ls
+:MasonInstall delve js-debug-adapter codelldb elixir-ls ocaml-lsp ocamlformat
 ```
 
 For Node/TypeScript services:
@@ -191,6 +197,14 @@ For C/C++/Zig:
 - build with debug symbols, for example `clang -g -O0`, `clang++ -g -O0`, or
   `zig build -Doptimize=Debug`
 - use `LLDB: Launch executable` or `LLDB: Attach process`
+
+For OCaml:
+
+- initialize an opam switch on the machine
+- use `ocamllsp` for LSP/completion and `ocamlformat` for formatting
+- use `ocamlearlybird` for DAP debugging when a compatible build is available
+- build bytecode with debug symbols, usually through Dune `(modes byte exe)`
+- debug the generated `.bc` file under `_build/default`
 
 For detailed debugger scenario runbooks, see the DAP section in
 `plugin-commands.md`.

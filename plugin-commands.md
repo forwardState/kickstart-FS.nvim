@@ -165,7 +165,7 @@
   - `Node: Attach inspect port 9229`
   - `Browser: Launch Chrome/SvelteKit`
   - `Browser: Attach Chrome port 9222`
-- C/C++/Zig:
+- C/C++/Rust/Zig:
   - `LLDB: Launch executable`
   - `LLDB: Attach process`
 - OCaml:
@@ -354,7 +354,7 @@ Browser attach steps:
 
 If client breakpoints do not bind, check that source maps are being generated and that the URL matches the running app.
 
-#### C / C++ / Zig
+#### C / C++ / Rust / Zig
 
 These use `codelldb`. Build binaries with debug symbols.
 
@@ -370,6 +370,12 @@ C++:
 clang++ -g -O0 main.cpp -o main
 ```
 
+Rust:
+
+```sh
+cargo build
+```
+
 Zig:
 
 ```sh
@@ -383,11 +389,12 @@ zig build-exe -O Debug main.zig
 ```
 
 Then use `LLDB: Launch executable` and select the compiled binary.
+Rust binaries built with Cargo are usually under `target/debug/`.
 
 Launch steps:
 
 1. Build the binary with debug symbols.
-2. Open the relevant `.c`, `.cpp`, `.h`, `.hpp`, or `.zig` file.
+2. Open the relevant `.c`, `.cpp`, `.h`, `.hpp`, `.rs`, or `.zig` file.
 3. Set a breakpoint with `<leader>b`.
 4. Press `<leader>dc`.
 5. Choose `LLDB: Launch executable`.

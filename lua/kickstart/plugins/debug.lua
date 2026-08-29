@@ -295,7 +295,7 @@ return {
       },
     }
 
-    for _, language in ipairs { 'c', 'cpp', 'zig' } do
+    for _, language in ipairs { 'c', 'cpp', 'rust', 'zig' } do
       dap.configurations[language] = native_configurations
     end
 

@@ -90,6 +90,11 @@ P.S. You can delete this when you're done too. It's your config now! :)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
+local rustup_bin = '/opt/homebrew/opt/rustup/bin'
+if vim.fn.isdirectory(rustup_bin) == 1 and not string.find(vim.env.PATH or '', rustup_bin, 1, true) then
+  vim.env.PATH = rustup_bin .. ':' .. vim.env.PATH
+end
+
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
 
@@ -667,7 +672,18 @@ require('lazy').setup({
         zls = {},
         intelephense = {},
         ocamllsp = {},
-        -- rust_analyzer = {},
+        rust_analyzer = {
+          settings = {
+            ['rust-analyzer'] = {
+              cargo = {
+                allFeatures = true,
+              },
+              check = {
+                command = 'clippy',
+              },
+            },
+          },
+        },
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
         -- Some languages (like typescript) have entire language plugins that can be useful:
@@ -813,6 +829,7 @@ require('lazy').setup({
         lua = { 'stylua' },
         ocaml = { 'ocamlformat' },
         reason = { 'ocamlformat' },
+        rust = { 'rustfmt' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
@@ -1040,6 +1057,7 @@ require('lazy').setup({
         'elixir',
         'cpp',
         'python',
+        'rust',
         'zig',
         'svelte',
         'ocaml',

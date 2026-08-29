@@ -15,7 +15,7 @@ language servers, formatters, and debug adapters are mostly managed by Mason.
 Install the baseline tools with Homebrew:
 
 ```sh
-brew install neovim git make ripgrep fd unzip node go elixir erlang llvm zig opam
+brew install neovim git make ripgrep fd unzip node go elixir erlang llvm zig opam rustup-init
 ```
 
 Install Apple's command line tools if they are not already present:
@@ -40,6 +40,8 @@ Notes:
   separately for Neovim DAP.
 - `zig` is needed for Zig projects; debug builds use `codelldb`.
 - `opam` is needed for OCaml tools installed through Mason/opam.
+- `rustup-init` is used to install the Rust toolchain, including `cargo`,
+  `rustc`, and `rustfmt`.
 - database CLIs are useful for `vim-dadbod`, depending on which databases you use.
 - Chrome is only needed for browser debugging.
 
@@ -166,14 +168,14 @@ DAP is configured for:
 
 - Go through Delve
 - JavaScript/TypeScript/Svelte through `js-debug-adapter`
-- C/C++/Zig through `codelldb`
+- C/C++/Rust/Zig through `codelldb`
 - OCaml through `ocamlearlybird` when installed separately
 - Elixir through `elixir-ls-debugger`
 
 Mason should install the debug adapters automatically. If needed:
 
 ```vim
-:MasonInstall delve js-debug-adapter codelldb elixir-ls ocaml-lsp ocamlformat
+:MasonInstall delve js-debug-adapter codelldb elixir-ls ocaml-lsp ocamlformat rust-analyzer
 ```
 
 For Node/TypeScript services:
@@ -193,11 +195,18 @@ For browser/SvelteKit debugging:
   --user-data-dir=/tmp/chrome-nvim-dap
 ```
 
-For C/C++/Zig:
+For C/C++/Rust/Zig:
 
 - build with debug symbols, for example `clang -g -O0`, `clang++ -g -O0`, or
-  `zig build -Doptimize=Debug`
+  `cargo build`, or `zig build -Doptimize=Debug`
 - use `LLDB: Launch executable` or `LLDB: Attach process`
+
+For Rust:
+
+- install the Rust toolchain with `rustup-init`
+- use `rust_analyzer` for LSP/completion and `rustfmt` for formatting
+- use `codelldb` for DAP debugging
+- build with `cargo build`; debug binaries are usually under `target/debug`
 
 For OCaml:
 

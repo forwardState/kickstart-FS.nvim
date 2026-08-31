@@ -299,6 +299,78 @@ return {
       dap.configurations[language] = native_configurations
     end
 
+    local debugpy_adapter = vim.fn.exepath 'debugpy-adapter'
+    if debugpy_adapter ~= '' then
+      dap.adapters.python = {
+        type = 'executable',
+        command = debugpy_adapter,
+      }
+
+      local function python_path()
+        local venv = vim.env.VIRTUAL_ENV
+        if venv and venv ~= '' then
+          return venv .. '/bin/python'
+        end
+
+        local conda = vim.env.CONDA_PREFIX
+        if conda and conda ~= '' then
+          return conda .. '/bin/python'
+        end
+
+        return vim.fn.exepath 'python3'
+      end
+
+      dap.configurations.python = {
+        {
+          name = 'Python: Launch current file',
+          type = 'python',
+          request = 'launch',
+          program = '${file}',
+          cwd = '${workspaceFolder}',
+          console = 'integratedTerminal',
+          justMyCode = true,
+          pythonPath = python_path,
+        },
+        {
+          name = 'Python: Launch module',
+          type = 'python',
+          request = 'launch',
+          module = function()
+            return vim.fn.input 'Module: '
+          end,
+          cwd = '${workspaceFolder}',
+          console = 'integratedTerminal',
+          justMyCode = true,
+          pythonPath = python_path,
+          args = function()
+            return split_args(vim.fn.input 'Args: ')
+          end,
+        },
+        {
+          name = 'Python: Attach debugpy port 5678',
+          type = 'python',
+          request = 'attach',
+          connect = {
+            host = function()
+              return input('127.0.0.1', 'Debug host: ')
+            end,
+            port = function()
+              return tonumber(input('5678', 'Debug port: '))
+            end,
+          },
+          pathMappings = {
+            {
+              localRoot = '${workspaceFolder}',
+              remoteRoot = function()
+                return input('${workspaceFolder}', 'Remote root: ')
+              end,
+            },
+          },
+          justMyCode = true,
+        },
+      }
+    end
+
     local elixir_ls_debugger = vim.fn.exepath 'elixir-ls-debugger'
     if elixir_ls_debugger ~= '' then
       dap.adapters.mix_task = {

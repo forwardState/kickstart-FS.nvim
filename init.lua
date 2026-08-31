@@ -726,6 +726,8 @@ require('lazy').setup({
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
+        'ruff',
+        'debugpy',
         'ocamlformat',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
@@ -829,6 +831,7 @@ require('lazy').setup({
         lua = { 'stylua' },
         ocaml = { 'ocamlformat' },
         reason = { 'ocamlformat' },
+        python = { 'ruff_fix', 'ruff_organize_imports', 'ruff_format' },
         rust = { 'rustfmt' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
@@ -1092,7 +1095,7 @@ require('lazy').setup({
   --
   require 'kickstart.plugins.debug',
   require 'kickstart.plugins.indent_line',
-  -- require 'kickstart.plugins.lint',
+  require 'kickstart.plugins.lint',
   require 'kickstart.plugins.autopairs',
   require 'kickstart.plugins.neo-tree',
   require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps

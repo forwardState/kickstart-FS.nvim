@@ -168,6 +168,7 @@ DAP is configured for:
 
 - Go through Delve
 - JavaScript/TypeScript/Svelte through `js-debug-adapter`
+- Python through `debugpy`
 - C/C++/Rust/Zig through `codelldb`
 - OCaml through `ocamlearlybird` when installed separately
 - Elixir through `elixir-ls-debugger`
@@ -175,7 +176,7 @@ DAP is configured for:
 Mason should install the debug adapters automatically. If needed:
 
 ```vim
-:MasonInstall delve js-debug-adapter codelldb elixir-ls ocaml-lsp ocamlformat rust-analyzer
+:MasonInstall delve js-debug-adapter codelldb elixir-ls pyright ruff debugpy ocaml-lsp ocamlformat rust-analyzer
 ```
 
 For Node/TypeScript services:
@@ -194,6 +195,13 @@ For browser/SvelteKit debugging:
   --remote-debugging-port=9222 \
   --user-data-dir=/tmp/chrome-nvim-dap
 ```
+
+For Python:
+
+- use `pyright` for LSP/completion
+- use `ruff` for linting, import organization, fixes, and formatting
+- use `debugpy` for DAP debugging
+- project virtualenvs are detected through `VIRTUAL_ENV`; Conda envs through `CONDA_PREFIX`
 
 For C/C++/Rust/Zig:
 

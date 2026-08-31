@@ -156,8 +156,12 @@
 - `<leader>b` - toggle breakpoint
 - `<leader>B` - set conditional breakpoint
 - Inline DAP virtual text is enabled with basic redaction for values that look like secrets/API data.
-- Installed adapters: `delve`, `js-debug-adapter`, `codelldb`, `elixir-ls-debugger`
+- Installed adapters: `delve`, `js-debug-adapter`, `debugpy`, `codelldb`, `elixir-ls-debugger`
 - Go: configured through `nvim-dap-go`
+- Python:
+  - `Python: Launch current file`
+  - `Python: Launch module`
+  - `Python: Attach debugpy port 5678`
 - JavaScript/TypeScript/Svelte:
   - `Node: Launch current file`
   - `Node: Launch package script`
@@ -353,6 +357,32 @@ Browser attach steps:
 7. Accept host `127.0.0.1` and port `9222`.
 
 If client breakpoints do not bind, check that source maps are being generated and that the URL matches the running app.
+
+#### Python
+
+Python editor support:
+
+- syntax highlighting: Treesitter `python`
+- completion/go-to-definition/etc: `pyright`
+- linting: `ruff`
+- formatting: `ruff`
+- debugging: `debugpy`
+
+Use `Python: Launch current file` for scripts.
+
+Use `Python: Launch module` for module entrypoints, for example:
+
+```text
+pytest
+```
+
+Attach to an already running process by starting Python with debugpy:
+
+```sh
+python -m debugpy --listen 5678 --wait-for-client -m your_module
+```
+
+Then use `Python: Attach debugpy port 5678`.
 
 #### C / C++ / Rust / Zig
 
